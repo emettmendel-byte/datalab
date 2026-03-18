@@ -37,13 +37,7 @@ async def plan_agent(
                 schema = {}
 
     agent = DataScienceAgent()
-    try:
-        plan = await agent.plan_lifecycle(payload.goal, schema)
-    except Exception:
-        raise HTTPException(
-            status_code=502,
-            detail="The AI planner couldn't generate a plan right now. Please try again, or rephrase your goal.",
-        )
+    plan, used_fallback = await agent.plan_lifecycle_with_fallback(payload.goal, schema)
 
     session.add(
         AgentPrompt(
@@ -61,6 +55,15 @@ async def plan_agent(
             content=json.dumps(plan.model_dump(), ensure_ascii=False),
         )
     )
+    if used_fallback:
+        session.add(
+            AgentPrompt(
+                project_id=project_id,
+                tab_name="Question",
+                role="assistant",
+                content="Planner fallback used because the local LLM was unavailable.",
+            )
+        )
     session.commit()
 
     return plan

@@ -118,6 +118,7 @@ class CleaningStep(BaseModel):
 
 class CleanRequest(BaseModel):
     steps: list[CleaningStep]
+    instruction: str | None = None
 
 
 class TransformationStepRead(BaseModel):
@@ -174,4 +175,12 @@ class ModelPredictRequest(BaseModel):
 class AgentRunRequest(BaseModel):
     dataset_id: int
     goal: str
+
+
+class CleanSuggestRequest(BaseModel):
+    instruction: str | None = None
+
+
+class ExploreChatRequest(BaseModel):
+    question: str
 

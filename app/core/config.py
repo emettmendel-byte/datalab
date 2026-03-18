@@ -14,9 +14,10 @@ class Settings(BaseSettings):
     s3_bucket: str | None = None
     s3_region: str | None = None
     s3_endpoint_url: str | None = None
+    local_storage_dir: str = ".local_storage"
 
     ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "llama3"
+    ollama_model: str = "llama3.2:latest"
 
 
 settings = Settings()

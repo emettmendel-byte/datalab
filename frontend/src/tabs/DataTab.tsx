@@ -51,6 +51,11 @@ export function DataTab({ projectId, selectedDatasetId, onSelectDataset }: Props
     setFile(null);
   };
 
+  const uploadErrorMessage =
+    uploadMutation.error instanceof Error
+      ? uploadMutation.error.message
+      : "Upload failed. Please verify your file format.";
+
   return (
     <Stack spacing={2}>
       <Typography variant="h6">Upload and preview your data</Typography>
@@ -86,7 +91,7 @@ export function DataTab({ projectId, selectedDatasetId, onSelectDataset }: Props
             </span>
           </Tooltip>
           {uploadMutation.isPending && <CircularProgress size={20} />}
-          {uploadMutation.error && <Alert severity="error">Upload failed. Please verify your file format.</Alert>}
+          {uploadMutation.error && <Alert severity="error">{uploadErrorMessage}</Alert>}
         </Stack>
       </Paper>
 

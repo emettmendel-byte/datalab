@@ -28,6 +28,10 @@ interface Props {
 
 export function QuestionTab({ projectId, datasetId, goal, onGoalChange, plan, onPlan }: Props) {
   const mutation = usePlanMutation(projectId, datasetId);
+  const errorMessage =
+    mutation.error instanceof Error
+      ? mutation.error.message
+      : "Could not generate a plan. Try rephrasing your goal.";
 
   const grouped = useMemo(() => {
     if (!plan) return new Map<LifecycleTab, Plan["steps"]>();
@@ -43,8 +47,12 @@ export function QuestionTab({ projectId, datasetId, goal, onGoalChange, plan, on
 
   const ask = async () => {
     if (!projectId) return;
-    const data = await mutation.mutateAsync(goal);
-    onPlan(data);
+    try {
+      const data = await mutation.mutateAsync(goal);
+      onPlan(data);
+    } catch {
+      // handled by mutation.error UI
+    }
   };
 
   return (
@@ -71,7 +79,7 @@ export function QuestionTab({ projectId, datasetId, goal, onGoalChange, plan, on
         </Tooltip>
       </Box>
       {mutation.isPending && <CircularProgress size={24} />}
-      {mutation.error && <Alert severity="error">Could not generate a plan. Try rephrasing your goal.</Alert>}
+      {mutation.error && <Alert severity="error">{errorMessage}</Alert>}
 
       {plan && (
         <Stack spacing={2}>

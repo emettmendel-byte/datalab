@@ -28,8 +28,11 @@ S3 settings are read from environment variables:
 Optional:
 
 - `OLLAMA_BASE_URL` (default `http://localhost:11434`)
+- `OLLAMA_MODEL` (default `llama3.2:latest`)
 
 You can put these in a `.env` file in the repo root.
+
+If `S3_BUCKET` is not set, the app now falls back to local file storage under `.local_storage/` for development.
 
 ## Run
 

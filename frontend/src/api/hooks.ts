@@ -1,16 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  askExploreQuestion,
   askAgentPlan,
+  createProject,
+  diagnoseCleanMessiness,
   explainExploreStep,
   fetchChartData,
   generateReport,
   getExploreInsights,
+  getExploreSuggestedQuestions,
   latestReport,
   listDatasets,
   listProjects,
   predictModel,
   previewDataset,
   runClean,
+  suggestCleanSteps,
   suggestCharts,
   trainModel,
   uploadDataset,
@@ -21,6 +26,16 @@ export function useProjectsQuery() {
   return useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
+  });
+}
+
+export function useCreateProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: { name: string; description?: string; user_id?: number }) => createProject(args),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
   });
 }
 
@@ -59,12 +74,26 @@ export function usePlanMutation(projectId?: number, datasetId?: number | null) {
 export function useCleanMutation(datasetId?: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (steps: Array<{ operation_type: string; parameters: object; description: string; generated_code?: string | null }>) =>
-      runClean(datasetId as number, steps),
+    mutationFn: (args: {
+      steps: Array<{ operation_type: string; parameters: object; description: string; generated_code?: string | null }>;
+      instruction?: string;
+    }) => runClean(datasetId as number, args.steps, args.instruction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dataset-preview", datasetId] });
       queryClient.invalidateQueries({ queryKey: ["datasets"] });
     },
+  });
+}
+
+export function useSuggestCleanStepsMutation(datasetId?: number) {
+  return useMutation({
+    mutationFn: (instruction?: string) => suggestCleanSteps(datasetId as number, instruction),
+  });
+}
+
+export function useDiagnoseCleanMutation(datasetId?: number) {
+  return useMutation({
+    mutationFn: (instruction?: string) => diagnoseCleanMessiness(datasetId as number, instruction),
   });
 }
 
@@ -73,6 +102,20 @@ export function useExploreInsightsQuery(datasetId?: number) {
     queryKey: ["explore-insights", datasetId],
     queryFn: () => getExploreInsights(datasetId as number),
     enabled: Boolean(datasetId),
+  });
+}
+
+export function useExploreSuggestedQuestionsQuery(datasetId?: number) {
+  return useQuery({
+    queryKey: ["explore-suggested-questions", datasetId],
+    queryFn: () => getExploreSuggestedQuestions(datasetId as number),
+    enabled: Boolean(datasetId),
+  });
+}
+
+export function useAskExploreQuestionMutation(datasetId?: number) {
+  return useMutation({
+    mutationFn: (question: string) => askExploreQuestion(datasetId as number, question),
   });
 }
 
